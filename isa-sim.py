@@ -1,5 +1,6 @@
 import sys
 import re
+from smtpd import program
 
 print("\nWelcome to the ISA simulator! - Designed by <YOUR NAMES HERE>")
 
@@ -299,9 +300,59 @@ class InstructionMemory:
                 self.print_instruction(address)
 
 
-
-current_cycle=0
+program_complete=False
 program_counter=0
+
+def executeInstruction(opcode, op1, op2, op3=None):
+    global program_counter
+    global program_complete
+    if opcode == "ADD":
+        registerFile.write_register(op1, registerFile.read_register(op2) + registerFile.read_register(op3))
+        return
+    if opcode == "SUB":
+        registerFile.write_register(op1, registerFile.read_register(op2) - registerFile.read_register(op3))
+        return
+    if opcode == "OR":
+        registerFile.write_register(op1, registerFile.read_register(op2) | registerFile.read_register(op3))
+        return
+    if opcode == "AND":
+        registerFile.write_register(op1, registerFile.read_register(op2) & registerFile.read_register(op3))
+        return
+    if opcode == "NOT":
+        registerFile.write_register(op1, ~ registerFile.read_register(op2))
+        return
+
+    if opcode == "LI":
+        registerFile.write_register(op1, int(op2))
+        return
+    if opcode == "SD":
+        dataMemory.write_data(registerFile.read_register(op2), registerFile.read_register(op1))
+        return
+    if opcode == "LD":
+        registerFile.write_register(op1, dataMemory.read_data(registerFile.read_register(op2)))
+        return
+
+    if opcode == "JR":
+        program_counter = registerFile.read_register(op1)
+        return
+    if opcode == "JEQ":
+        if registerFile.read_register(op2) == registerFile.read_register(op3):
+            program_counter = registerFile.read_register(op1)
+            return
+        else:
+            program_counter += 1
+    if opcode == "JLT":
+        if registerFile.read_register(op2) < registerFile.read_register(op3):
+            program_counter = registerFile.read_register(op1)
+            print(f"going to line = {registerFile.read_register(op1)}")
+            return
+        else:
+            program_counter += 1
+    if opcode == "NOP":
+        return
+    if opcode == "END":
+        print("checkpoint")
+        program_complete = True
 
 registerFile = RegisterFile()
 dataMemory = DataMemory()
@@ -309,8 +360,30 @@ instructionMemory = InstructionMemory()
 
 print('\n---Start of simulation---')
 
-#####################################
-##      Write your code here      ##
-####################################
+cycle = 0
+while cycle < max_cycles and not program_complete:
+    print(f"-------------------------")
+    print(f"cycle = {cycle}\nprogram_counter = {program_counter}")
+    op_code = instructionMemory.read_opcode(program_counter)
+    operand_1 = instructionMemory.read_operand_1(program_counter)
+    operand_2 = instructionMemory.read_operand_2(program_counter)
+    operand_3 = instructionMemory.read_operand_3(program_counter)
+
+    executeInstruction(op_code, operand_1, operand_2, operand_3)
+
+    print(f"{op_code} {operand_1} {operand_2} {operand_3}")
+
+    if op_code != "JR" and op_code != "JEQ" and op_code != "JLT":
+        program_counter += 1
+
+    cycle += 1
+    print(f"program_complete = {program_complete}")
+    print(f"-------------------------")
+
+
+
+registerFile.print_all()
+dataMemory.print_used()
+print(f"Executes in {cycle-1} cycles.")
 
 print('\n---End of simulation---\n')
