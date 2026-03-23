@@ -1,0 +1,23 @@
+# We are making a fibonacci machine
+# First we initalize the register values that we need for the sequence
+# python isa-sim.py <max_cycles> <program_file> <data_mem_file
+
+0: LI R1, 1;                # load 1 into R1
+1: LI R2, 1;                # load 1 into R2
+2: LI R3, 0;                # clear our result register
+3: LI R8, 0;                # load memory address containing number of fibs to generate
+4: LD R4, R8;               # put that number into our counting register R4
+5: LI R9, 3;                # load a 2 into register 9, we need this for the next step
+6: SUB R4, R4, R9;          # we already have the first two (1 and 1) so start at the 3rd
+
+# Now we begin the fib loop
+7: ADD R3, R1, R2;
+8: DEC R4, 1;
+9: MOV R1, R2;              # shift down R2 to R1
+10: MOV R2, R3;             # shift down R3 to R2
+11: JGT 7, R4, 0;           # we loop back to generate a new number if our counter is still positive
+
+# Now we save our result
+12: LI R5, 1;               # load the memory address we want to save to into R5
+13: SD R3, R5;              # save the final vaue stored in R3 to the address in R5
+14: END;
