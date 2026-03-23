@@ -8,7 +8,7 @@
 3: LI R8, 0;                # load memory address containing number of fibs to generate
 4: LD R4, R8;               # put that number into our counting register R4
 5: LI R9, 3;                # load a 3 into register 9, we need this for the next step
-6: SUB R4, R4, R9;          # we already have the first two (1 and 1) so start at the 3rd
+6: SUB R4, R4, R9;          # we already have the first two (0, 1, 1) so start at the 3rd
 
 # Now we begin the fib loop
 7: ADD R3, R1, R2;
